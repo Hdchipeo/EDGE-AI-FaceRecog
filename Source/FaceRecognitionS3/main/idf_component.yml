@@ -1,0 +1,13 @@
+dependencies:
+  espressif/esp-dl:
+    version: ">=3.2.0"
+  espressif/human_face_detect:
+    version: "*"
+  espressif/human_face_recognition:
+    version: "*"
+  espressif/esp32-camera:
+    version: "*"
+  joltwallet/littlefs:
+    version: "*"
+  espressif/button:
+    version: "^4.1.7"

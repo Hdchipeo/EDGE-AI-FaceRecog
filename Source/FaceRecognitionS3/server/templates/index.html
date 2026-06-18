@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Face Recognition Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --danger-color: #ef4444;
+            --danger-hover: #dc2626;
+            --success-color: #10b981;
+            --success-hover: #059669;
+            --warning-color: #f59e0b;
+            --warning-hover: #d97706;
+            --border-color: #334155;
+        }
+
+        body {
+            font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-top: 0;
+            margin-bottom: 8px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 24px;
+        }
+
+        .ip-badge {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            display: inline-flex;
+            align-items: center;
+            margin-right: 12px;
+        }
+
+        .ip-edit-btn {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .ip-edit-btn:hover {
+            color: var(--text-primary);
+            border-color: var(--text-secondary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .card {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            font-family: inherit;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .btn-primary { background: var(--accent-color); }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        
+        .btn-danger { background: var(--danger-color); }
+        .btn-danger:hover { background: var(--danger-hover); transform: translateY(-1px); }
+
+        .btn-success { background: var(--success-color); }
+        .btn-success:hover { background: var(--success-hover); transform: translateY(-1px); }
+
+        .btn-warning { background: var(--warning-color); padding: 6px 12px; font-size: 0.8rem; border-radius: 6px; }
+        .btn-warning:hover { background: var(--warning-hover); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: 0.95rem;
+        }
+
+        th {
+            text-align: left;
+            padding: 12px 8px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border-color);
+            font-weight: 500;
+        }
+
+        td {
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .status {
+            margin-top: 16px;
+            font-weight: 500;
+            color: #a5b4fc;
+            font-size: 0.9rem;
+            min-height: 20px;
+        }
+
+        code {
+            background: #0f172a;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            color: #f472b6;
+        }
+
+        .face-thumb {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background: #334155;
+            transition: transform 0.2s ease;
+            display: block;
+        }
+
+        .face-thumb:hover {
+            transform: scale(1.15);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Face Identification System</h1>
+        <div class="subtitle">
+            Local Mac IP: <span class="ip-badge">{{ local_ip }}</span>
+            ESP32 IP: <span class="ip-badge" id="esp-ip">{{ esp_ip }}</span>
+            <button class="ip-edit-btn" onclick="changeEspIp()">✏️ Edit IP</button>
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>👥 Registered Faces Database</h3>
+                <div class="btn-group">
+                    <button class="btn-success" onclick="syncDb()">🔄 Pull Sync from ESP32</button>
+                    <button class="btn-danger" onclick="deleteAll()">🗑️ Wipe DB</button>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 15%">ID</th>
+                            <th style="width: 20%">Photo</th>
+                            <th style="width: 40%">Name</th>
+                            <th style="width: 25%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for face in faces %}
+                        <tr>
+                            <td>{{ face[0] }}</td>
+                            <td>
+                                <img class="face-thumb" src="/static/images/{{ face[1]|safe_filename }}.jpg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2244%22 height=%2244%22 viewBox=%220 0 44 44%22><circle cx=%2222%22 cy=%2222%22 r=%2222%22 fill=%22%23334155%22/><text x=%2250%%22 y=%2255%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22 fill=%22%2394a3b8%22 font-family=%22sans-serif%22 font-size=%2216%22 font-weight=%22bold%22>{% if face[1] %}{{ face[1][0]|upper }}{% else %}?{% endif %}</text></svg>';">
+                            </td>
+                            <td style="font-weight: 500; vertical-align: middle;">{{ face[1] }}</td>
+                            <td style="vertical-align: middle;">
+                                <button class="btn-warning" onclick="renameFace({{ face[0] }}, '{{ face[1] }}')">✏️ Rename</button>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 24px;">No faces enrolled.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h3>🚀 Over-the-Air Update (OTA)</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem; line-height: 1.5;">
+                    To flash firmware remotely, copy the compiled <code>FaceRecognitionS3.bin</code> binary into the <code>server/firmware/</code> folder, then press the button below.
+                </p>
+                <button class="btn-primary" style="width: 100%;" onclick="triggerOta()">📡 Push OTA to ESP32</button>
+                <div id="ota-status" class="status"></div>
+            </div>
+            
+            <div class="card" style="margin-top: 24px;">
+                <h3>📋 Device Logs</h3>
+                <div id="logs-container" style="background: #0f172a; padding: 12px; border-radius: 8px; font-family: monospace; font-size: 0.85rem; max-height: 250px; overflow-y: auto; border: 1px solid var(--border-color); color: #34d399; line-height: 1.4; text-align: left;">
+                    <div style="color: var(--text-secondary);">Waiting for logs...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function syncDb() {
+            let res = await fetch('/sync_from_esp', {method: 'POST'});
+            let json = await res.json();
+            if(json.status === 'ok') location.reload();
+            else alert("Error: " + json.error);
+        }
+
+        async function deleteAll() {
+            if(!confirm("Are you sure you want to clear the entire face database on the ESP32?")) return;
+            let res = await fetch('/delete_all', {method: 'POST'});
+            let json = await res.json();
+            if(json.status === 'ok') location.reload();
+            else alert("Error: " + json.error);
+        }
+
+        async function renameFace(id, oldName) {
+            let newName = prompt(`Enter new name for Face ID ${id}:`, oldName);
+            if (newName === null) return; // cancelled
+            newName = newName.trim();
+            if (newName === "" || newName === oldName) return;
+            
+            let res = await fetch('/rename', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: id, name: newName})
+            });
+            let json = await res.json();
+            if(json.status === 'ok') {
+                location.reload();
+            } else {
+                alert("Error: " + json.error);
+            }
+        }
+
+        async function changeEspIp() {
+            let currentIp = document.getElementById('esp-ip').innerText;
+            let newIp = prompt("Enter the new ESP32 IP Address:", currentIp);
+            if (newIp === null) return;
+            newIp = newIp.trim();
+            if (newIp === "" || newIp === currentIp) return;
+            
+            let res = await fetch('/change_esp_ip', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ip: newIp})
+            });
+            let json = await res.json();
+            if (json.status === 'ok') {
+                location.reload();
+            } else {
+                alert("Error: " + json.error);
+            }
+        }
+
+        async function triggerOta() {
+            document.getElementById('ota-status').innerText = "Sending OTA command to ESP32...";
+            let res = await fetch('/trigger_ota', {method: 'POST'});
+            let json = await res.json();
+            if(json.status) {
+                document.getElementById('ota-status').innerText = "Success: OTA initiated. The ESP32 is downloading firmware and will reboot.";
+            } else {
+                document.getElementById('ota-status').innerText = "Error: " + json.error;
+            }
+        }
+
+        async function fetchLogs() {
+            try {
+                let res = await fetch('/api/logs');
+                let logs = await res.json();
+                let container = document.getElementById('logs-container');
+                if (logs.length === 0) {
+                    container.innerHTML = '<div style="color: var(--text-secondary);">No logs yet.</div>';
+                } else {
+                    container.innerHTML = logs.map(l => {
+                        let color = '#a5b4fc'; // default light indigo
+                        if (l.startsWith('E (') || l.includes('ERROR') || l.includes('failed') || l.includes('FAILED')) color = '#f87171'; // red
+                        else if (l.startsWith('W (') || l.includes('WARNING') || l.includes('warning')) color = '#fbbf24'; // yellow/amber
+                        else if (l.startsWith('D (') || l.includes('DEBUG')) color = '#94a3b8'; // slate/gray
+                        else if (l.startsWith('I (')) color = '#34d399'; // green for normal info
+                        else if (l.includes('Recognized')) color = '#10b981'; // bright green
+                        return `<div style="color: ${color}; margin-bottom: 2px;">${l}</div>`;
+                    }).join('');
+                    container.scrollTop = container.scrollHeight;
+                }
+            } catch (e) {
+                console.error("Failed to fetch logs", e);
+            }
+        }
+        setInterval(fetchLogs, 1000);
+        window.addEventListener('DOMContentLoaded', fetchLogs);
+    </script>
+</body>
+</html>

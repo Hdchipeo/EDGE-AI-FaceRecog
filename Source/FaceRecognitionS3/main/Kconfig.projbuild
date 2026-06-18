@@ -1,0 +1,92 @@
+menu "Face Recognition System Configuration"
+
+    menu "Feature Toggles"
+        config ENABLE_WEB_SERVER
+            bool "Enable Web Server (Port 80/81)"
+            default y
+            help
+                Enable Web interface for streaming and enrollment.
+                
+        config ENABLE_LCD
+            bool "Enable ST7789 LCD Display"
+            default y
+            help
+                Enable LCD screen rendering.
+            
+        config ENABLE_CONSOLE
+            bool "Enable ESP Console (UART/USB)"
+            default y
+            help
+                Enable serial console commands for debugging and enroll.
+    endmenu
+
+    menu "Camera Orientation Configuration"
+        choice CAMERA_ROTATION
+            prompt "Camera Rotation Angle"
+            default CAMERA_ROTATION_0
+            help
+                Select the software camera rotation angle.
+
+            config CAMERA_ROTATION_0
+                bool "0 degrees (Landscape)"
+            config CAMERA_ROTATION_90
+                bool "90 degrees Clockwise (Portrait)"
+            config CAMERA_ROTATION_180
+                bool "180 degrees (Upside Down)"
+            config CAMERA_ROTATION_270
+                bool "270 degrees Counter-Clockwise (Portrait)"
+        endchoice
+    endmenu
+
+
+    choice FACE_RECOGNITION_MODEL
+        prompt "Face Recognition Model Type"
+        default MODEL_TYPE_CUSTOM_MOBILENETV2
+        help
+            Select the model to use for face recognition.
+
+        config MODEL_TYPE_MFN_S8_V1
+            bool "Default MobileFaceNet (MFN_S8_V1)"
+            help
+                Standard Espressif MFN model.
+
+        config MODEL_TYPE_MBF_S8_V1
+            bool "Default MobileNet (MBF_S8_V1)"
+            help
+                Standard Espressif MBF model.
+
+        config MODEL_TYPE_CUSTOM_MOBILENETV2
+            bool "Custom MobileNetV2 (Reinforcement Trained)"
+            help
+                Custom model from TrainModel directory.
+    endchoice
+
+    menu "WiFi Station Configuration"
+        config ESP_WIFI_SSID
+            string "WiFi SSID"
+            default "MyWiFiNetwork"
+            help
+                SSID of the Wi-Fi network to connect to.
+
+        config ESP_WIFI_PASSWORD
+            string "WiFi Password"
+            default "MyPassword123"
+            help
+                Password of the Wi-Fi network.
+    endmenu
+
+    menu "Python Server Configuration"
+        config PYTHON_SERVER_IP
+            string "Python Server IP Address"
+            default "192.168.1.5"
+            help
+                IP address of the Python dashboard server.
+
+        config PYTHON_SERVER_PORT
+            string "Python Server Port"
+            default "8088"
+            help
+                Port of the Python dashboard server.
+    endmenu
+
+endmenu

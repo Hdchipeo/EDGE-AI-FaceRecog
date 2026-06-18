@@ -46,3 +46,11 @@ sdkconfig.old
 
 # Local databases
 **/faces.db
+
+# Academic documents, templates, signatures, outline, and scratch folders
+Báo cáo tuần/
+Chữ ký/
+Mẫu/
+scratch/
+Đề cương/
+
